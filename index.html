@@ -3,121 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AliExpress 促销码智能匹配器</title>
+    <title>⚡ AliExpress Promo Matcher V3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* 全局：加入微弱的背景渐变，打破纯黑的死板，让毛玻璃有内容可折射 */
         body {
-            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            font-family: 'Space Grotesk', 'Microsoft YaHei', sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem;
-            color: #333;
+            background: radial-gradient(circle at 15% 50%, #12151f 0%, #06070a 100%);
+            color: #ffffff;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+
+        /* 顶部装饰霓虹光圈 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -150px;
+            right: -150px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(37, 226, 232, 0.15) 0%, rgba(37, 226, 232, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 2rem; position: relative; z-index: 1; }
         
-        .header { text-align: center; color: white; padding: 1rem 0; }
-        .header h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
-        
-        .card { background: white; border-radius: 1rem; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-        .card-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.2rem; color: #1a1a2e; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center;}
+        /* 1. Header */
+        .header { text-align: left; position: relative; margin-bottom: 0.5rem; }
+        .header h1 { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #3ae2b2 0%, #25e2e8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.04em; }
+        .header p { font-size: 1rem; color: #8a93a6; margin-top: 0.4rem; font-weight: 400; }
+
+        /* 2. 核心：带边缘高光的毛玻璃卡片 */
+        .glass-card {
+            background: rgba(26, 29, 36, 0.75); /* 深灰半透明底色，和背景拉开层次 */
+            border-radius: 1.25rem;
+            padding: 2.5rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            /* 模拟玻璃边缘受光：左上亮，右下暗 */
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5); /* 更强的悬浮阴影 */
+            position: relative;
+        }
+
+        .card-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 2rem; color: #ffffff; letter-spacing: -0.02em; display: flex; justify-content: space-between; align-items: center;}
         
         .btn-group { display: flex; gap: 1rem; }
-        .btn-small { padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; font-weight: bold; cursor: pointer; border: none; transition: all 0.2s; }
-        .btn-save { background: #10b981; color: white; }
-        .btn-save:hover { background: #059669; }
-        .btn-add { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; }
-        .btn-add:hover { background: #e5e7eb; }
+        .btn { padding: 0.6rem 1.2rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s ease-in-out; }
+        .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
+        .btn-save:hover { box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
+        .btn-add { background: rgba(255, 255, 255, 0.05); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-add:hover { background: rgba(255, 255, 255, 0.1); }
+
+        /* 国家配置网格 (内嵌凹陷感) */
+        .country-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+        .country-box { 
+            background: rgba(10, 12, 16, 0.6); /* 故意比外层卡片暗，形成凹陷感 */
+            padding: 1.5rem; border-radius: 1rem; 
+            border: 1px solid rgba(0, 0, 0, 0.5); /* 暗色边框增强内嵌感 */
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); /* 内阴影 */
+            display: flex; flex-direction: column; gap: 0.75rem; transition: all 0.2s; position: relative; 
+        }
+        .country-box:focus-within { border: 1px solid rgba(58, 226, 178, 0.4); box-shadow: 0 0 15px rgba(58, 226, 178, 0.1), inset 0 2px 10px rgba(0,0,0,0.3); }
         
-        .country-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-        .country-box { background: #f8f9ff; padding: 1rem; border-radius: 0.75rem; border: 1px solid #e6e9fe; display: flex; flex-direction: column; gap: 0.5rem; position: relative; }
-        .country-info { display: flex; gap: 0.5rem; align-items: center; }
-        .country-info input { padding: 0.4rem; border: 1px solid #d1d5db; border-radius: 0.4rem; font-size: 0.95rem; font-weight: bold; text-align: center; }
-        .c-code { width: 80px; color: #1a1a2e; }
-        .c-curr { width: 60px; color: #667eea; background: #eef2ff;}
-        .btn-remove { position: absolute; top: 0.8rem; right: 0.8rem; background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; opacity: 0.5; }
+        .country-info { display: flex; gap: 0.75rem; align-items: center; }
+        .country-info input { padding: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 0.6rem; font-size: 1rem; font-weight: 700; text-align: center; background: rgba(255, 255, 255, 0.03); color: white; transition: border 0.2s;}
+        .country-info input:focus { border-color: rgba(58, 226, 178, 0.5); }
+        .country-info input::placeholder { color: rgba(255, 255, 255, 0.2); font-weight: normal; }
+        .c-code { flex: 1; text-transform: uppercase; }
+        .c-curr { width: 70px; color: #3ae2b2; }
         
-        textarea { width: 100%; height: 110px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.85rem; font-family: monospace; resize: none; line-height: 1.4; color: #4b5563; }
-        textarea:focus, input:focus, select:focus { border-color: #667eea; outline: none; }
+        .btn-remove { position: absolute; top: 1.2rem; right: 1.2rem; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: all 0.2s;}
+        .btn-remove:hover { background: rgba(239, 68, 68, 0.25); transform: scale(1.1); }
+
+        textarea {
+            width: 100%; height: 120px; padding: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 0.75rem;
+            font-size: 0.85rem; font-family: monospace; resize: none; line-height: 1.5; color: #cbd5e1; background: transparent;
+        }
+        textarea:focus { border-color: rgba(58, 226, 178, 0.4); outline: none; }
+        textarea::-webkit-scrollbar { width: 6px; }
+        textarea::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
         
-        .action-bar { display: flex; gap: 1.5rem; align-items: flex-end; background: #f8f9ff; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid #e6e9fe; }
-        .input-group { display: flex; flex-direction: column; gap: 0.3rem; }
-        label { font-size: 0.85rem; font-weight: 700; color: #444; }
-        .action-bar input, .action-bar select { padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 0.5rem; font-size: 1.1rem; font-weight: bold; width: 150px; }
+        /* 底部控制台：横向现代风格 */
+        .control-panel { display: flex; gap: 1.5rem; align-items: flex-start; }
+        
+        .main-inputs { display: flex; gap: 1.5rem; flex: none; }
+        .input-pair { display: flex; flex-direction: column; gap: 0.6rem; }
+        label { font-size: 0.9rem; font-weight: 700; color: #8a93a6; }
+        .main-inputs input, .main-inputs select { padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 0.8rem; font-size: 1.2rem; font-weight: 700; width: 160px; background: rgba(10, 12, 16, 0.6); color: white; transition: border 0.2s;}
+        .main-inputs input:focus, .main-inputs select:focus { border-color: rgba(58, 226, 178, 0.5); outline: none;}
         
         /* 动态汇率面板 */
-        .rates-panel { display: flex; gap: 1rem; flex-wrap: wrap; padding: 1rem; background: #fff; border-radius: 0.5rem; border: 1px dashed #ccc; flex: 1; align-items: center; }
-        .rate-item { display: flex; flex-direction: column; gap: 0.2rem; }
-        .rate-item input { width: 80px; padding: 0.4rem; font-size: 0.9rem; font-weight: bold; color: #667eea; border: 1px solid #d1d5db; border-radius: 0.3rem; }
+        .rates-panel { flex: 1; display: flex; flex-direction: column; gap: 0.75rem; padding: 1.25rem; background: rgba(10, 12, 16, 0.4); border-radius: 0.8rem; border: 1px dashed rgba(255, 255, 255, 0.1); }
+        .rates-header { font-size: 0.8rem; color: #64748b; font-weight: 700; letter-spacing: 0.05em; }
+        .rates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; }
+        .rate-item { display: flex; flex-direction: column; gap: 0.3rem; }
+        .rate-item label { font-size: 0.8rem; color: #94a3b8; }
+        .rate-item input { width: 100%; padding: 0.5rem; font-size: 0.95rem; font-weight: 700; color: #3ae2b2; background: rgba(255, 255, 255, 0.03); border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .rate-item input:focus { border-color: #3ae2b2; outline: none; }
         
-        .btn-primary { padding: 1rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.75rem; font-size: 1.2rem; font-weight: 700; cursor: pointer; }
+        /* 主计算按钮 */
+        .btn-calculate {
+            padding: 1rem 2.5rem; background: linear-gradient(135deg, #3ae2b2 0%, #25e2e8 100%);
+            color: #06070a; border: none; border-radius: 0.8rem; font-size: 1.15rem; font-weight: 800; cursor: pointer;
+            letter-spacing: 0.02em; box-shadow: 0 4px 20px rgba(37, 226, 232, 0.25); transition: all 0.2s;}
+        .btn-calculate:hover { box-shadow: 0 6px 25px rgba(37, 226, 232, 0.4); transform: translateY(-2px); }
+        .btn-calculate:active { transform: scale(0.98); }
         
-        .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem; }
-        .result-item { background: #fff; padding: 1.5rem; border-radius: 0.5rem; border: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; }
-        .result-item.success { border-color: #667eea; background: #f8f9ff; }
-        .result-text { color: #1a1a2e; font-weight: 600; }
-        .result-text strong { color: #667eea; font-weight: 800;}
-        .code-badge { background: #667eea; color: white; padding: 0.4rem 0.8rem; border-radius: 0.3rem; font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; }
-        .r-empty { color: #9ca3af; font-weight: normal; }
+        /* 结果展示区 */
+        .results-section { display: flex; flex-direction: column; gap: 1.5rem; }
+        .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
         
-        .btn-copy { width: 100%; padding: 1rem; background: #667eea; color: white; border: none; border-radius: 0.5rem; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin-top: 1.5rem; }
+        .result-card {
+            background: rgba(10, 12, 16, 0.6); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease-in-out;
+        }
+        .result-card.success { background: linear-gradient(to right, rgba(37, 226, 232, 0.03), rgba(10, 12, 16, 0.6)); border-left: 3px solid #3ae2b2; }
+        
+        .result-text { font-size: 1.1rem; color: #e2e8f0; }
+        .result-text strong.country { font-weight: 700; color: #94a3b8; margin-right: 0.5rem;}
+        .result-text strong.accent { font-weight: 800; color: #3ae2b2; }
+        .code-block { display: flex; align-items: center; gap: 0.75rem;}
+        .result-empty { color: #64748b; font-size: 1rem; }
+        
+        .code-badge { background: linear-gradient(135deg, #3ae2b2 0%, #25e2e8 100%); color: #06070a; padding: 0.5rem 1rem; border-radius: 0.4rem; font-weight: 800; font-size: 1.3rem; letter-spacing: 0.05em; font-family: 'Space Grotesk', monospace; box-shadow: 0 2px 10px rgba(37, 226, 232, 0.2); }
+        
+        .btn-copy { width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); color: #3ae2b2; border: 1px solid rgba(58, 226, 178, 0.3); border-radius: 0.75rem; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; }
+        .btn-copy:hover { background: rgba(58, 226, 178, 0.1); border-color: #3ae2b2; }
         .hidden { display: none; }
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000; }
+
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 24px; border-radius: 0.5rem; font-weight: bold; opacity: 0; transition: all 0.3s ease-in-out; pointer-events: none; z-index: 1000; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); }
         
         @media (max-width: 1024px) { .country-grid, .results-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 640px) { .country-grid, .results-grid, .action-bar { grid-template-columns: 1fr; flex-direction: column; } .action-bar input, .action-bar select { width: 100%; } }
+        @media (max-width: 768px) { .country-grid, .results-grid, .control-panel, .main-inputs { grid-template-columns: 1fr; flex-direction: column; } .main-inputs input, .main-inputs select, .btn-calculate { width: 100%; } }
     </style>
 </head>
 <body>
-    <div id="toast">保存成功！</div>
+    <div id="toast">✅ 配置已成功保存至本地！</div>
     <div class="container">
         <div class="header">
-            <h1>⚡ HiBREW 大促Code 匹配器</h1>
+            <h1>⚡ HiBREW 大促CODE 自动匹配器 V2</h1>
+            <p>全球动态汇率计算的最优 Code 对齐工具</p>
         </div>
 
-        <div class="card">
+        <div class="glass-card">
             <div class="card-title">
-                <span>🌍 1. 粘贴各国大促规则文本 (支持全球任意符号 R$ / zł / £ 等)</span>
+                <span>🌍 1. 填写国家CODE ，填完后记得点保存。</span>
                 <div class="btn-group">
-                    <button class="btn-small btn-add" id="addCountryBtn">➕ 添加国家</button>
-                    <button class="btn-small btn-save" id="saveDataBtn">💾 保存当前配置</button>
+                    <button class="btn btn-add" id="addCountryBtn">➕ 添加国家</button>
+                    <button class="btn btn-save" id="saveDataBtn">💾 保存当前配置</button>
                 </div>
             </div>
             <div class="country-grid" id="countryGrid"></div>
         </div>
 
-        <div class="card">
-            <div class="card-title">💰 2. 录入底价与全自动汇率面板</div>
-            <div class="action-bar">
-                <div class="input-group">
-                    <label>单价货币</label>
-                    <select id="productCurrency">
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>产品基准底价</label>
-                    <input type="number" id="productPrice" placeholder="例: 260" step="0.01">
+        <div class="glass-card">
+            <div class="card-title">💰 2. 填写产品价格！</div>
+            <div class="control-panel">
+                <div class="main-inputs">
+                    <div class="input-pair">
+                        <label>单价货币</label>
+                        <select id="productCurrency">
+                            <option value="USD">$ USD</option>
+                            <option value="EUR">€ EUR</option>
+                        </select>
+                    </div>
+                    <div class="input-pair">
+                        <label>基准底价</label>
+                        <input type="number" id="productPrice" placeholder="例: 260" step="0.01">
+                    </div>
                 </div>
                 
                 <div class="rates-panel" id="ratesPanel">
-                    </div>
+                    <div class="rates-header">⚙️ 实时对标汇率 (1 USD = ?)</div>
+                    <div class="rates-grid" id="ratesGrid"></div>
+                </div>
 
-                <button class="btn-primary" id="calculateBtn">🎯 提炼 & 计算</button>
+                <button class="btn-calculate" id="calculateBtn">🎯 运行计算</button>
             </div>
         </div>
 
-        <div class="card hidden" id="resultsCard">
-            <div class="card-title">✨ 极简匹配结果</div>
-            <div class="results-grid" id="resultsContainer"></div>
-            <button class="btn-copy" id="copyBtn">📋 一键提取排版文本</button>
+        <div class="glass-card hidden" id="resultsCard">
+            <div class="card-title">✨ 匹配结果矩阵</div>
+            <div class="results-section">
+                <div class="results-grid" id="resultsContainer"></div>
+                <button class="btn-copy" id="copyBtn">📋 一键提取排版文本</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // 内置常见全球货币对应及默认汇率 (不在列表里的也能填，系统会自动创建输入框)
         const DEFAULT_RATES = { EUR: 0.92, GBP: 0.79, SAR: 3.75, KRW: 1320, AED: 3.67, PLN: 4.01, UAH: 39.5, BRL: 5.1, RUB: 90 };
-        const SYMBOL_TO_CODE = { '€': 'EUR', '$': 'USD', '£': 'GBP', '₩': 'KRW', 'R$': 'BRL', 'ZŁ': 'PLN', '₴': 'UAH', '¥': 'JPY', '₽': 'RUB' };
+        const SYMBOL_TO_CODE = { '€': 'EUR', '$': 'USD', '£': 'GBP', '₩': 'KRW', 'R$': 'BRL', 'zł': 'PLN', '₴': 'UAH', '¥': 'JPY', '₽': 'RUB' };
         
         let userRatesCache = JSON.parse(localStorage.getItem('aliexpressRatesCache')) || { ...DEFAULT_RATES };
 
@@ -133,51 +222,47 @@
                 <div class="country-box">
                     <button class="btn-remove" onclick="this.parentElement.remove(); updateRatesPanel();" title="移除此国家">×</button>
                     <div class="country-info">
-                        <input type="text" class="c-code" value="${country}" placeholder="国家">
-                        <input type="text" class="c-curr" value="${symbol}" placeholder="符号">
+                        <input type="text" class="c-code" value="${country}" placeholder="国家(如ES)">
+                        <input type="text" class="c-curr" value="${symbol}" placeholder="符号(如€)">
                     </div>
                     <textarea class="c-text-block" placeholder="粘贴文本，如：\n15€-3€\nESAE03">${text}</textarea>
                 </div>
             `;
         }
 
-        // 🌟 动态刷新汇率面板（核心黑科技）
         function updateRatesPanel() {
-            const panel = document.getElementById('ratesPanel');
+            const panel = document.getElementById('ratesGrid');
             const uniqueCurrencies = new Set();
             
-            // 扫描所有输入框里的货币
             document.querySelectorAll('.c-curr').forEach(input => {
                 let curr = input.value.toUpperCase().trim();
                 curr = SYMBOL_TO_CODE[curr] || curr;
                 if (curr && curr !== 'USD' && curr !== '$') uniqueCurrencies.add(curr);
             });
 
-            let html = '<div style="width:100%; font-size:0.8rem; color:#666; font-weight:bold;">⚙️ 动态全局汇率对标 (1 USD = ?)</div>';
+            let html = '';
             
             uniqueCurrencies.forEach(c => {
                 const val = userRatesCache[c] || DEFAULT_RATES[c] || 1;
                 html += `
                     <div class="rate-item">
-                        <label>${c} 汇率</label>
+                        <label>${c}</label>
                         <input type="number" step="0.0001" class="dyn-rate" data-curr="${c}" value="${val}">
                     </div>
                 `;
             });
             
             if(uniqueCurrencies.size === 0) {
-                html += '<div style="font-size:0.85rem; color:#999;">无需额外汇率转换</div>';
-            }
-
-            panel.innerHTML = html;
-
-            // 监听用户手动修改新汇率并自动保存
-            panel.querySelectorAll('.dyn-rate').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    userRatesCache[e.target.dataset.curr] = parseFloat(e.target.value) || 1;
-                    localStorage.setItem('aliexpressRatesCache', JSON.stringify(userRatesCache));
+                panel.innerHTML = '<div style="font-size:0.85rem; color:#64748b;">当前无需汇率换算</div>';
+            } else {
+                panel.innerHTML = html;
+                panel.querySelectorAll('.dyn-rate').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        userRatesCache[e.target.dataset.curr] = parseFloat(e.target.value) || 1;
+                        localStorage.setItem('aliexpressRatesCache', JSON.stringify(userRatesCache));
+                    });
                 });
-            });
+            }
         }
 
         function loadData() {
@@ -191,31 +276,26 @@
                 if (parsed.currency) document.getElementById('productCurrency').value = parsed.currency;
             }
             countryGrid.innerHTML = setup.map(item => createBoxHTML(item.c, item.s, item.t)).join('');
-            
-            updateRatesPanel(); // 初始化加载时生成面板
+            updateRatesPanel(); 
         }
 
-        // 事件委托：监听符号和文本的自动补全
         countryGrid.addEventListener('input', (e) => {
             if (e.target.classList.contains('c-text-block')) {
-                // 更强大的全局符号正则捕捉
-                const match = e.target.value.match(/(EUR|USD|GBP|SAR|KRW|AED|PLN|UAH|BRL|RUB|JPY|[$€£₩¥₽]|R\$|ZŁ)/i);
+                const match = e.target.value.match(/(EUR|USD|GBP|SAR|KRW|AED|PLN|UAH|BRL|RUB|JPY|[$€£₩¥₽]|R\$|zł)/i);
                 if (match) {
                     let detected = match[1].toUpperCase();
-                    // 将提取到的全称逆向转换为你想要的极简符号
                     const codeToSymbol = { 'EUR':'€', 'USD':'$', 'GBP':'£', 'KRW':'₩', 'BRL':'R$', 'PLN':'zł', 'UAH':'₴' };
                     let displaySymbol = codeToSymbol[detected] || detected;
                     
                     const currInput = e.target.parentElement.querySelector('.c-curr');
-                    // 仅当用户没填符号时才自动帮忙填入
                     if (!currInput.value) {
                         currInput.value = displaySymbol;
-                        updateRatesPanel(); // 自动新增汇率框
+                        updateRatesPanel(); 
                     }
                 }
             }
             if (e.target.classList.contains('c-curr')) {
-                updateRatesPanel(); // 用户手动改符号时，实时刷新面板
+                updateRatesPanel(); 
             }
         });
 
@@ -243,8 +323,9 @@
             if (!price) { alert('请输入产品底价！'); return; }
 
             const getRate = (code) => {
-                if (code === 'USD') return 1;
-                return userRatesCache[code] || DEFAULT_RATES[code] || 1;
+                if (code === 'USD' || code === 'USD') return 1;
+                if (code === 'EUR' || code === 'EUR') return userRatesCache['EUR'];
+                return userRatesCache[code] || 1;
             };
 
             const boxes = document.querySelectorAll('.country-box');
@@ -299,8 +380,8 @@
             container.innerHTML = results.map(r => {
                 if (!r.best) {
                     return `
-                        <div class="result-item">
-                            <span class="r-empty">未匹配到 <strong>${r.country}</strong> 可用门槛</span>
+                        <div class="result-card">
+                            <span class="result-empty">未达匹配门槛 → <strong>${r.country}</strong></span>
                         </div>
                     `;
                 }
@@ -309,14 +390,15 @@
                 const dStr = r.best.discount.toLocaleString('en-US');
                 
                 return `
-                    <div class="result-item success">
-                        <span class="result-text">满足 <strong>${r.country}</strong> code ${r.rawSymbol} ${tStr}-${dStr}</span>
-                        <span>code：<span class="code-badge">${r.best.code}</span></span>
+                    <div class="result-card success">
+                        <span class="result-text"><strong class="country">${r.country}</strong><strong class="accent">${r.rawSymbol} ${tStr}-${dStr}</strong></span>
+                        <div class="code-block"><span class="code-badge">${r.best.code}</span></div>
                     </div>
                 `;
             }).join('');
 
             document.getElementById('resultsCard').classList.remove('hidden');
+            document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth' });
             window.latestResults = results;
         }
 
@@ -330,7 +412,11 @@
                     return `满足 ${r.country} code ${r.rawSymbol} ${tStr}-${dStr} code：${r.best.code}`;
                 })
                 .join('\n');
-            navigator.clipboard.writeText(text).then(() => alert('🎉 结果已按照指定格式复制成功！'));
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.textContent = "✅ 排版文本复制成功！";
+                toast.style.opacity = 1; setTimeout(() => { toast.style.opacity = 0; setTimeout(()=> toast.textContent="✅ 配置已成功保存至本地！", 300); }, 2000);
+            });
         });
     </script>
 </body>
