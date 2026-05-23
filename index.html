@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeX V3</title>
+    <title>⚡ CodeX V3</title>
     <link rel="icon" type="image/png" href="CODEX.png">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -113,6 +113,13 @@
             letter-spacing: 0.02em; box-shadow: 0 4px 20px rgba(37, 226, 232, 0.25); transition: all 0.2s; height: 100%; min-height: 70px;}
         .btn-calculate:hover { box-shadow: 0 6px 25px rgba(37, 226, 232, 0.4); transform: translateY(-2px); }
         .btn-calculate:active { transform: scale(0.98); }
+
+        /* --- 批量上传按钮专属样式 --- */
+        .btn-bulk {
+            padding: 1rem 2.5rem; background: rgba(255, 255, 255, 0.05);
+            color: #3ae2b2; border: 1px dashed rgba(58, 226, 178, 0.5); border-radius: 0.8rem; font-size: 1.15rem; font-weight: 800; cursor: pointer;
+            letter-spacing: 0.02em; transition: all 0.2s; height: 100%; min-height: 70px; display: flex; align-items: center; justify-content: center; gap: 0.5rem;}
+        .btn-bulk:hover { background: rgba(58, 226, 178, 0.1); border-color: #3ae2b2; }
         
         .results-section { display: flex; flex-direction: column; gap: 1.5rem; }
         .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
@@ -137,51 +144,24 @@
 
         #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 24px; border-radius: 0.5rem; font-weight: bold; opacity: 0; transition: all 0.3s ease-in-out; pointer-events: none; z-index: 1000; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); }
 
-        /* --- 底部 Footer 专属样式 --- */
         .footer {
-            margin-top: 1rem;
-            padding-top: 1.5rem;
-            padding-bottom: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.08); /* 顶部极其细腻的分割线 */
-            font-size: 0.85rem;
-            color: #64748b;
+            margin-top: 1rem; padding-top: 1.5rem; padding-bottom: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem; color: #64748b;
         }
-        .footer-content {
-            display: flex;
-            justify-content: space-between; /* 桌面端左右两端对齐 */
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            letter-spacing: 0.02em;
-        }
-        .footer-left .author {
-            color: #e2e8f0;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            margin-left: 0.3rem;
-        }
-        .footer-right .email-link {
-            color: #3ae2b2; /* 继承工具的标志性薄荷绿 */
-            text-decoration: none;
-            font-weight: 700;
-            transition: all 0.2s ease;
-            margin-left: 0.3rem;
-        }
-        .footer-right .email-link:hover {
-            color: #25e2e8;
-            text-shadow: 0 0 10px rgba(37, 226, 232, 0.4); /* 鼠标悬浮时发出微光 */
-        }
+        .footer-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; letter-spacing: 0.02em;}
+        .footer-left .author { color: #e2e8f0; font-weight: 700; letter-spacing: 0.05em; margin-left: 0.3rem;}
+        .footer-right .email-link { color: #3ae2b2; text-decoration: none; font-weight: 700; transition: all 0.2s ease; margin-left: 0.3rem;}
+        .footer-right .email-link:hover { color: #25e2e8; text-shadow: 0 0 10px rgba(37, 226, 232, 0.4); }
         
         @media (max-width: 1024px) { .country-grid, .results-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) { 
             .country-grid, .results-grid, .control-panel, .main-inputs { grid-template-columns: 1fr; flex-direction: column; } 
-            .main-inputs input, .main-inputs select, .btn-calculate { width: 100%; } 
+            .main-inputs input, .main-inputs select, .btn-calculate, .btn-bulk { width: 100%; } 
             .footer-content { justify-content: center; text-align: center; }
         }
     </style>
 </head>
 <body>
-    <div id="toast">✅ 配置已成功保存至本地！</div>
+    <div id="toast">✅ 操作成功！</div>
     <div class="container">
         <div class="header">
             <h1>⚡ CodeX V3</h1>
@@ -200,44 +180,59 @@
         </div>
 
         <div class="glass-card">
-            <div class="card-title">💰 2. 录入产品底价与汇率调控</div>
+            <div class="card-title">💰 2. 计算终端 (单品演算 / TXT文件批量脱机渲染)</div>
             <div class="control-panel">
                 <div class="main-inputs">
                     <div class="input-pair">
-                        <label>单价货币</label>
+                        <label>基准货币</label>
                         <select id="productCurrency">
                             <option value="USD">$ USD</option>
                             <option value="EUR">€ EUR</option>
                         </select>
                     </div>
+                    
+                    <div class="rates-panel" id="ratesPanel" style="min-width: 250px;">
+                        <div class="rates-header">⚙️ 实时对标汇率 (1 USD = ?)</div>
+                        <div class="rates-grid" id="ratesGrid"></div>
+                    </div>
+                </div>
+
+                <div style="width: 1px; background: rgba(255,255,255,0.1); margin: 0 1rem; align-self: stretch;"></div>
+                
+                <div class="main-inputs" style="flex: 1;">
+                    <div style="width: 100%; font-size: 0.9rem; color:#8a93a6; font-weight:700; margin-bottom: -10px;">🎯 单品演算测试</div>
                     <div class="input-pair">
                         <label>基准底价</label>
                         <input type="number" id="productPrice" placeholder="例: 260" step="0.01">
                     </div>
                     <div class="input-pair">
-                        <label>SKU 命名 (生成文件用)</label>
+                        <label>SKU 命名</label>
                         <input type="text" id="skuNameInput" placeholder="H1B_Promo" value="H1B_Promo">
                     </div>
                     <div class="input-pair">
-                        <label>产品图片 (PS调用)</label>
+                        <label>图片名称</label>
                         <input type="text" id="imageNameInput" placeholder="H1B.png" value="H1B.png">
                     </div>
-                </div>
-                
-                <div class="rates-panel" id="ratesPanel">
-                    <div class="rates-header">⚙️ 实时对标汇率 (1 USD = ?)</div>
-                    <div class="rates-grid" id="ratesGrid"></div>
+                    <button class="btn-calculate" id="calculateBtn">运行演算</button>
                 </div>
 
-                <button class="btn-calculate" id="calculateBtn">🎯 提炼 & 运行计算</button>
+                <div class="main-inputs" style="flex: 1; flex-direction: column;">
+                    <div style="width: 100%; font-size: 0.9rem; color:#8a93a6; font-weight:700; margin-bottom: -10px;">📂 批量提炼输出 (终极自动化)</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">TXT 格式要求每行填写: SKU名称,图片名,价格 <br>(例: H1B_Promo,H1B.png,260)</div>
+                    <input type="file" id="bulkFileInput" accept=".txt,.csv" style="display: none;">
+                    <button class="btn-bulk" id="triggerFileBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        上传TXT一键跑出PS数据包
+                    </button>
+                </div>
             </div>
         </div>
 
         <div class="glass-card hidden" id="resultsCard">
-            <div class="card-title">✨ 匹配结果矩阵</div>
+            <div class="card-title">✨ 单品匹配结果矩阵</div>
             <div class="results-section">
                 <div class="results-grid" id="resultsContainer"></div>
-                <button class="btn-copy" id="copyBtn">📋 一键提取 PS 自动化标准数据文本</button>
+                <button class="btn-copy" id="copyBtn">📋 一键提取单品文本 (纯净复制)</button>
             </div>
         </div>
         
@@ -267,6 +262,13 @@
 
         const countryGrid = document.getElementById('countryGrid');
 
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.opacity = 1; 
+            setTimeout(() => { toast.style.opacity = 0; }, 3000);
+        }
+
         function createBoxHTML(country, symbol, text) {
             return `
                 <div class="country-box">
@@ -291,7 +293,6 @@
             });
 
             let html = '';
-            
             uniqueCurrencies.forEach(c => {
                 const val = userRatesCache[c] || DEFAULT_RATES[c] || 1;
                 html += `
@@ -344,9 +345,7 @@
                     }
                 }
             }
-            if (e.target.classList.contains('c-curr')) {
-                updateRatesPanel(); 
-            }
+            if (e.target.classList.contains('c-curr')) updateRatesPanel(); 
         });
 
         document.getElementById('saveDataBtn').addEventListener('click', () => {
@@ -356,8 +355,7 @@
             localStorage.setItem('aliexpressDataCache', JSON.stringify({
                 price: document.getElementById('productPrice').value, currency: document.getElementById('productCurrency').value, boxes: boxes
             }));
-            const toast = document.getElementById('toast');
-            toast.style.opacity = 1; setTimeout(() => toast.style.opacity = 0, 2000);
+            showToast("✅ 配置已成功保存至本地缓存！");
         });
 
         document.getElementById('addCountryBtn').addEventListener('click', () => {
@@ -366,15 +364,11 @@
 
         loadData();
 
-        document.getElementById('calculateBtn').addEventListener('click', () => {
-            const price = parseFloat(document.getElementById('productPrice').value);
-            const baseCurrency = document.getElementById('productCurrency').value;
-
-            if (!price) { alert('请输入产品底价！'); return; }
-
+        // ======= 核心计算引擎 (单品与批量共用) =======
+        function runCalculationEngine(price, baseCurrency) {
             const getRate = (code) => {
-                if (code === 'USD' || code === 'USD') return 1;
-                if (code === 'EUR' || code === 'EUR') return userRatesCache['EUR'];
+                if (code === 'USD') return 1;
+                if (code === 'EUR') return userRatesCache['EUR'];
                 return userRatesCache[code] || 1;
             };
 
@@ -385,7 +379,6 @@
                 const country = box.querySelector('.c-code').value.toUpperCase().trim();
                 const rawSymbol = box.querySelector('.c-curr').value.trim();
                 const textBlock = box.querySelector('.c-text-block').value.trim();
-                
                 if (!country || !textBlock) return;
                 
                 const currencyCode = SYMBOL_TO_CODE[rawSymbol.toUpperCase()] || rawSymbol.toUpperCase();
@@ -398,7 +391,6 @@
                         let threshold = parseFloat(numMatch[1].replace(/,/g, ''));
                         let discount = parseFloat(numMatch[2].replace(/,/g, ''));
                         let code = '';
-                        
                         if (i + 1 < lines.length && /^[A-Z0-9]{4,15}$/i.test(lines[i+1].replace(/[\s]/g, ''))) {
                             code = lines[i+1].replace(/[\s]/g, '').toUpperCase();
                             i++; 
@@ -411,66 +403,26 @@
                         if (!isNaN(threshold) && !isNaN(discount) && code) tiers.push({ threshold, discount, code });
                     }
                 }
-
                 if (tiers.length === 0) return;
 
                 const convertedPrice = price * (getRate(currencyCode) / getRate(baseCurrency));
                 const validTiers = tiers.filter(t => convertedPrice >= t.threshold).sort((a, b) => b.discount - a.discount);
-
                 results.push({ country, rawSymbol, convertedPrice, best: validTiers.length > 0 ? validTiers[0] : null });
             });
 
-            renderResults(results);
-        });
-
-        function renderResults(results) {
-            const container = document.getElementById('resultsContainer');
-            if (results.length === 0) { alert('未提取到有效数据！'); return; }
-
-            container.innerHTML = results.map(r => {
-                if (!r.best) {
-                    return `
-                        <div class="result-card">
-                            <span class="result-empty">未达匹配门槛 → <strong>${r.country}</strong></span>
-                        </div>
-                    `;
-                }
-                
-                const tStr = r.best.threshold.toLocaleString('en-US');
-                const dStr = r.best.discount.toLocaleString('en-US');
-                
-                return `
-                    <div class="result-card success">
-                        <span class="result-text"><strong class="country">${r.country}</strong><strong class="accent">${r.rawSymbol} ${tStr}-${dStr}</strong></span>
-                        <div class="code-block"><span class="code-badge">${r.best.code}</span></div>
-                    </div>
-                `;
-            }).join('');
-
-            document.getElementById('resultsCard').classList.remove('hidden');
-            document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth' });
-            window.latestResults = results;
+            return results;
         }
 
-        // --- 极简纯行复制逻辑：完全去掉表头 ---
-        document.getElementById('copyBtn').addEventListener('click', () => {
-            if (!window.latestResults) return;
-            
-            // 【重点防雷机制】强行把用户输入的逗号替换成下划线，彻底防止 PS 解析错乱
-            const skuName = document.getElementById('skuNameInput').value.trim().replace(/,/g, '_') || "Auto_SKU"; 
-            const imageName = document.getElementById('imageNameInput').value.trim().replace(/,/g, '_') || "Auto_Image.png"; 
+        // ======= 杀毒函数：拔掉千分位逗号 =======
+        const safeFormat = (num) => num.toString().replace(/,/g, '');
 
+        // ======= 将计算结果转为 PS 逗号数据行的组装器 =======
+        function buildPsDataRow(skuName, imageName, matchResults) {
             let priceData = { SA: '', FR: '', DE: '', KR: '', GCC: '', Other: '' };
             let codeData = { SA: '', FR: '', DE: '', KR: '', GCC: '', Other: '' };
 
-            // 杀毒函数：拔掉所有千分位逗号
-            const safeFormat = (num) => {
-                return num.toString().replace(/,/g, '');
-            };
-
-            window.latestResults.forEach(r => {
+            matchResults.forEach(r => {
                 if (!r.best) return;
-                
                 const country = r.country.toUpperCase();
                 const priceStr = `${safeFormat(r.best.threshold)}-${safeFormat(r.best.discount)}`;
                 const codeStr = r.best.code;
@@ -490,20 +442,120 @@
                 }
             });
 
-            // 仅仅组装逗号数据行，不再拼接上面的 SKU_Name 等表头文本
-            const dataRow = `${skuName},${imageName},${priceData.SA},${codeData.SA},${priceData.FR},${codeData.FR},${priceData.DE},${codeData.DE},${priceData.KR},${codeData.KR},${priceData.GCC},${codeData.GCC},${priceData.Other},${codeData.Other}`;
+            return `${skuName},${imageName},${priceData.SA},${codeData.SA},${priceData.FR},${codeData.FR},${priceData.DE},${codeData.DE},${priceData.KR},${codeData.KR},${priceData.GCC},${codeData.GCC},${priceData.Other},${codeData.Other}`;
+        }
+
+        // ======= A: 单品演算逻辑 =======
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const baseCurrency = document.getElementById('productCurrency').value;
+            if (!price) { alert('请输入基准底价！'); return; }
+
+            const results = runCalculationEngine(price, baseCurrency);
             
-            // 写入剪贴板 (只有干干净净的一行数据)
+            const container = document.getElementById('resultsContainer');
+            if (results.length === 0) { alert('未提取到有效规则，请检查配置！'); return; }
+
+            container.innerHTML = results.map(r => {
+                if (!r.best) return `<div class="result-card"><span class="result-empty">未达匹配门槛 → <strong>${r.country}</strong></span></div>`;
+                const tStr = r.best.threshold.toLocaleString('en-US');
+                const dStr = r.best.discount.toLocaleString('en-US');
+                return `<div class="result-card success">
+                    <span class="result-text"><strong class="country">${r.country}</strong><strong class="accent">${r.rawSymbol} ${tStr}-${dStr}</strong></span>
+                    <div class="code-block"><span class="code-badge">${r.best.code}</span></div></div>`;
+            }).join('');
+
+            document.getElementById('resultsCard').classList.remove('hidden');
+            document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth' });
+            window.latestResults = results;
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            if (!window.latestResults) return;
+            const skuName = document.getElementById('skuNameInput').value.trim().replace(/,/g, '_') || "Auto_SKU"; 
+            const imageName = document.getElementById('imageNameInput').value.trim().replace(/,/g, '_') || "Auto_Image.png"; 
+            
+            const dataRow = buildPsDataRow(skuName, imageName, window.latestResults);
+            
             navigator.clipboard.writeText(dataRow).then(() => {
-                const toast = document.getElementById('toast');
-                toast.textContent = "✅ 数据行已成功复制！请前往主 TXT 文件另起一行粘贴";
-                toast.style.opacity = 1; 
-                setTimeout(() => { toast.style.opacity = 0; }, 3000);
-            }).catch(err => {
-                console.error("复制失败: ", err);
-                alert("复制失败，请重试或检查浏览器权限。");
+                showToast("✅ 数据行已复制！可直接粘贴到 PS 数据表中。");
             });
         });
+
+        // ======= B: 终极批量自动化逻辑 =======
+        const bulkBtn = document.getElementById('triggerFileBtn');
+        const fileInput = document.getElementById('bulkFileInput');
+
+        // 点击漂亮按钮，触发隐藏的原始上传按钮
+        bulkBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // 当用户选择了 txt 文件后触发
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const baseCurrency = document.getElementById('productCurrency').value;
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                
+                // 1. 初始化标准 14 列完美表头
+                let finalExportText = "SKU_Name,Product_Image,SA_Price,SA_Code,FR_Price,FR_Code,DE_Price,DE_Code,KR_Price,KR_Code,GCC_Price,GCC_Code,Other_Price,Other_Code\n";
+                let successCount = 0;
+
+                // 2. 逐行读取用户写的 SKU, 图片, 价格
+                lines.forEach(line => {
+                    // 兼容中文逗号和多余空格
+                    const cleanLine = line.trim().replace(/，/g, ','); 
+                    if (!cleanLine) return; // 跳过空行
+                    
+                    const parts = cleanLine.split(',');
+                    if (parts.length >= 3) {
+                        const skuName = parts[0].trim();
+                        const imageName = parts[1].trim();
+                        const price = parseFloat(parts[2].trim());
+                        
+                        if (!isNaN(price)) {
+                            // 调用核心引擎算出所有国家的最优解
+                            const matchResults = runCalculationEngine(price, baseCurrency);
+                            // 组装成纯净无瑕的 14 列 PS 数据
+                            const dataRow = buildPsDataRow(skuName, imageName, matchResults);
+                            
+                            finalExportText += dataRow + "\n";
+                            successCount++;
+                        }
+                    }
+                });
+
+                if (successCount === 0) {
+                    alert('上传的TXT格式似乎不对哦，请确保每行格式为：SKU名字,图片名字,价格 (英文逗号隔开)');
+                    fileInput.value = ''; // 清空选择
+                    return;
+                }
+
+                // 3. 极速生成并自动下载完整的 PS 自动化表！
+                const blob = new Blob(["\uFEFF" + finalExportText], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                // 用日期命名导出文件
+                const dateStr = new Date().toISOString().slice(5,10).replace('-','');
+                a.download = `PS_批量数据大礼包_${dateStr}.txt`; 
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showToast(`🎉 终极进化！成功提炼 ${successCount} 个产品的所有数据，请查收下载！`);
+                fileInput.value = ''; // 清空选择以便下次重复上传
+            };
+
+            reader.readAsText(file);
+        });
+
     </script>
 </body>
 </html>
