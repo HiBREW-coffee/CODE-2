@@ -8,7 +8,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* 全局：加入微弱的背景渐变，打破纯黑的死板，让毛玻璃有内容可折射 */
         body {
             font-family: 'Space Grotesk', 'Microsoft YaHei', sans-serif;
             min-height: 100vh;
@@ -22,7 +21,6 @@
             overflow-x: hidden;
         }
 
-        /* 顶部装饰霓虹光圈 */
         body::before {
             content: '';
             position: absolute;
@@ -38,23 +36,20 @@
 
         .container { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 2rem; position: relative; z-index: 1; }
         
-        /* 1. Header */
         .header { text-align: left; position: relative; margin-bottom: 0.5rem; }
         .header h1 { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #3ae2b2 0%, #25e2e8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.04em; }
         .header p { font-size: 1rem; color: #8a93a6; margin-top: 0.4rem; font-weight: 400; }
 
-        /* 2. 核心：带边缘高光的毛玻璃卡片 */
         .glass-card {
-            background: rgba(26, 29, 36, 0.75); /* 深灰半透明底色，和背景拉开层次 */
+            background: rgba(26, 29, 36, 0.75); 
             border-radius: 1.25rem;
             padding: 2.5rem;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            /* 模拟玻璃边缘受光：左上亮，右下暗 */
             border: 1px solid rgba(255, 255, 255, 0.04);
             border-top: 1px solid rgba(255, 255, 255, 0.12);
             border-left: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5); /* 更强的悬浮阴影 */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5); 
             position: relative;
         }
 
@@ -67,13 +62,12 @@
         .btn-add { background: rgba(255, 255, 255, 0.05); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
         .btn-add:hover { background: rgba(255, 255, 255, 0.1); }
 
-        /* 国家配置网格 (内嵌凹陷感) */
         .country-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
         .country-box { 
-            background: rgba(10, 12, 16, 0.6); /* 故意比外层卡片暗，形成凹陷感 */
+            background: rgba(10, 12, 16, 0.6); 
             padding: 1.5rem; border-radius: 1rem; 
-            border: 1px solid rgba(0, 0, 0, 0.5); /* 暗色边框增强内嵌感 */
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); /* 内阴影 */
+            border: 1px solid rgba(0, 0, 0, 0.5); 
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); 
             display: flex; flex-direction: column; gap: 0.75rem; transition: all 0.2s; position: relative; 
         }
         .country-box:focus-within { border: 1px solid rgba(58, 226, 178, 0.4); box-shadow: 0 0 15px rgba(58, 226, 178, 0.1), inset 0 2px 10px rgba(0,0,0,0.3); }
@@ -96,17 +90,15 @@
         textarea::-webkit-scrollbar { width: 6px; }
         textarea::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
         
-        /* 底部控制台：横向现代风格 */
-        .control-panel { display: flex; gap: 1.5rem; align-items: flex-start; }
+        .control-panel { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; }
         
-        .main-inputs { display: flex; gap: 1.5rem; flex: none; }
+        .main-inputs { display: flex; gap: 1.5rem; flex: none; flex-wrap: wrap; }
         .input-pair { display: flex; flex-direction: column; gap: 0.6rem; }
         label { font-size: 0.9rem; font-weight: 700; color: #8a93a6; }
-        .main-inputs input, .main-inputs select { padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 0.8rem; font-size: 1.2rem; font-weight: 700; width: 160px; background: rgba(10, 12, 16, 0.6); color: white; transition: border 0.2s;}
+        .main-inputs input, .main-inputs select { padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 0.8rem; font-size: 1.1rem; font-weight: 700; width: 150px; background: rgba(10, 12, 16, 0.6); color: white; transition: border 0.2s;}
         .main-inputs input:focus, .main-inputs select:focus { border-color: rgba(58, 226, 178, 0.5); outline: none;}
         
-        /* 动态汇率面板 */
-        .rates-panel { flex: 1; display: flex; flex-direction: column; gap: 0.75rem; padding: 1.25rem; background: rgba(10, 12, 16, 0.4); border-radius: 0.8rem; border: 1px dashed rgba(255, 255, 255, 0.1); }
+        .rates-panel { flex: 1; display: flex; flex-direction: column; gap: 0.75rem; padding: 1.25rem; background: rgba(10, 12, 16, 0.4); border-radius: 0.8rem; border: 1px dashed rgba(255, 255, 255, 0.1); min-width: 300px;}
         .rates-header { font-size: 0.8rem; color: #64748b; font-weight: 700; letter-spacing: 0.05em; }
         .rates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; }
         .rate-item { display: flex; flex-direction: column; gap: 0.3rem; }
@@ -114,15 +106,13 @@
         .rate-item input { width: 100%; padding: 0.5rem; font-size: 0.95rem; font-weight: 700; color: #3ae2b2; background: rgba(255, 255, 255, 0.03); border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.05); }
         .rate-item input:focus { border-color: #3ae2b2; outline: none; }
         
-        /* 主计算按钮 */
         .btn-calculate {
             padding: 1rem 2.5rem; background: linear-gradient(135deg, #3ae2b2 0%, #25e2e8 100%);
             color: #06070a; border: none; border-radius: 0.8rem; font-size: 1.15rem; font-weight: 800; cursor: pointer;
-            letter-spacing: 0.02em; box-shadow: 0 4px 20px rgba(37, 226, 232, 0.25); transition: all 0.2s;}
+            letter-spacing: 0.02em; box-shadow: 0 4px 20px rgba(37, 226, 232, 0.25); transition: all 0.2s; height: 100%; min-height: 70px;}
         .btn-calculate:hover { box-shadow: 0 6px 25px rgba(37, 226, 232, 0.4); transform: translateY(-2px); }
         .btn-calculate:active { transform: scale(0.98); }
         
-        /* 结果展示区 */
         .results-section { display: flex; flex-direction: column; gap: 1.5rem; }
         .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
         
@@ -154,13 +144,13 @@
     <div id="toast">✅ 配置已成功保存至本地！</div>
     <div class="container">
         <div class="header">
-            <h1>⚡ HiBREW 大促CODE 自动匹配器 V2</h1>
-            <p>全球动态汇率计算的最优 Code 对齐工具</p>
+            <h1>⚡ CodeX V3</h1>
+            <p>大促自动换算器，基于全球动态汇率计算的最优Code自动匹配工具</p>
         </div>
 
         <div class="glass-card">
             <div class="card-title">
-                <span>🌍 1. 填写国家CODE ，填完后记得点保存。</span>
+                <span>🌍 1. 填写国家与code挡位, 并保存配置。</span>
                 <div class="btn-group">
                     <button class="btn btn-add" id="addCountryBtn">➕ 添加国家</button>
                     <button class="btn btn-save" id="saveDataBtn">💾 保存当前配置</button>
@@ -184,6 +174,14 @@
                         <label>基准底价</label>
                         <input type="number" id="productPrice" placeholder="例: 260" step="0.01">
                     </div>
+                    <div class="input-pair">
+                        <label>SKU 命名 (生成文件用)</label>
+                        <input type="text" id="skuNameInput" placeholder="H1B_Promo" value="H1B_Promo">
+                    </div>
+                    <div class="input-pair">
+                        <label>产品图片 (PS调用)</label>
+                        <input type="text" id="imageNameInput" placeholder="H1B.png" value="H1B.png">
+                    </div>
                 </div>
                 
                 <div class="rates-panel" id="ratesPanel">
@@ -191,7 +189,7 @@
                     <div class="rates-grid" id="ratesGrid"></div>
                 </div>
 
-                <button class="btn-calculate" id="calculateBtn">🎯 运行计算</button>
+                <button class="btn-calculate" id="calculateBtn">🎯 开始运行</button>
             </div>
         </div>
 
@@ -199,7 +197,7 @@
             <div class="card-title">✨ 匹配结果矩阵</div>
             <div class="results-section">
                 <div class="results-grid" id="resultsContainer"></div>
-                <button class="btn-copy" id="copyBtn">📋 一键提取排版文本</button>
+                <button class="btn-copy" id="copyBtn">📋 一键提取 PS 自动化标准数据文本</button>
             </div>
         </div>
     </div>
@@ -402,20 +400,55 @@
             window.latestResults = results;
         }
 
+        // --- 极简纯行复制逻辑：完全去掉表头 ---
         document.getElementById('copyBtn').addEventListener('click', () => {
             if (!window.latestResults) return;
-            const text = window.latestResults
-                .filter(r => r.best)
-                .map(r => {
-                    const tStr = r.best.threshold.toLocaleString('en-US');
-                    const dStr = r.best.discount.toLocaleString('en-US');
-                    return `满足 ${r.country} code ${r.rawSymbol} ${tStr}-${dStr} code：${r.best.code}`;
-                })
-                .join('\n');
-            navigator.clipboard.writeText(text).then(() => {
+            
+            const skuName = document.getElementById('skuNameInput').value.trim() || "Auto_SKU"; 
+            const imageName = document.getElementById('imageNameInput').value.trim() || "Auto_Image.png"; 
+
+            let priceData = { SA: '', FR: '', DE: '', KR: '', GCC: '', Other: '' };
+            let codeData = { SA: '', FR: '', DE: '', KR: '', GCC: '', Other: '' };
+
+            // 杀毒函数：拔掉所有千分位逗号
+            const safeFormat = (num) => {
+                return num.toString().replace(/,/g, '');
+            };
+
+            window.latestResults.forEach(r => {
+                if (!r.best) return;
+                
+                const country = r.country.toUpperCase();
+                const priceStr = `${safeFormat(r.best.threshold)}-${safeFormat(r.best.discount)}`;
+                const codeStr = r.best.code;
+
+                if (country === 'SA') {
+                    priceData.SA = `SAR ${priceStr}`; codeData.SA = codeStr;
+                } else if (country === 'FR' || country === 'ES') { 
+                    priceData.FR = `€${priceStr}`; codeData.FR = codeStr;
+                } else if (country === 'DE') {
+                    priceData.DE = `€${priceStr}`; codeData.DE = codeStr;
+                } else if (country === 'KR') {
+                    priceData.KR = `₩${priceStr}`; codeData.KR = codeStr;
+                } else if (country === 'UAE' || country === 'GCC') { 
+                    priceData.GCC = `$${priceStr}`; codeData.GCC = codeStr;
+                } else if (country === 'OTHERS' || country === 'US' || country === 'OTHER') {
+                    priceData.Other = `$${priceStr}`; codeData.Other = codeStr;
+                }
+            });
+
+            // 仅仅组装逗号数据行，不再拼接上面的 SKU_Name 等表头文本
+            const dataRow = `${skuName},${imageName},${priceData.SA},${codeData.SA},${priceData.FR},${codeData.FR},${priceData.DE},${codeData.DE},${priceData.KR},${codeData.KR},${priceData.GCC},${codeData.GCC},${priceData.Other},${codeData.Other}`;
+            
+            // 写入剪贴板 (只有干干净净的一行数据)
+            navigator.clipboard.writeText(dataRow).then(() => {
                 const toast = document.getElementById('toast');
-                toast.textContent = "✅ 排版文本复制成功！";
-                toast.style.opacity = 1; setTimeout(() => { toast.style.opacity = 0; setTimeout(()=> toast.textContent="✅ 配置已成功保存至本地！", 300); }, 2000);
+                toast.textContent = "✅ 数据行已成功复制！请前往主 TXT 文件另起一行粘贴";
+                toast.style.opacity = 1; 
+                setTimeout(() => { toast.style.opacity = 0; }, 3000);
+            }).catch(err => {
+                console.error("复制失败: ", err);
+                alert("复制失败，请重试或检查浏览器权限。");
             });
         });
     </script>
